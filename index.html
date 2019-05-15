@@ -160,13 +160,24 @@
             if (shaka.Player.isBrowserSupported() && p2pml.shaka.Engine.isSupported()) {
                 const settings = {
                     segments: {
-                        assetsStorage: assetsStorage
+                        assetsStorage: assetsStorage,
                     },
                     loader: {
-                        segmentsStorage: segmentsStorage
+                        segmentsStorage: segmentsStorage,
+                        trackerAnnounce: ["wss://tracker.novage.com.ua"]
                     }
                 };
                 const engine = new p2pml.shaka.Engine(settings);
+
+                function log(message) {
+                    const p = document.createElement("p");
+                    p.innerHTML = message;
+                    document.body.appendChild(p);
+                }
+
+                engine.on(p2pml.core.Events.SegmentLoaded, (segment, peerId) => log(`segment ${segment.url} ${segment.range} loaded via ${peerId ? "P2P" : "HTTP"}`));
+                engine.on(p2pml.core.Events.PeerConnect, (peer) => log(`peer connected ${peer.id}`));
+                engine.on(p2pml.core.Events.PeerClose, (peer) => log(`peer disconnected ${peer.id}`));
 
                 const video = document.getElementById("video");
                 const player = new shaka.Player(video);
