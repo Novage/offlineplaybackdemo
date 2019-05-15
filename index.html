@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <video id="video" width="640" poster="https://shaka-player-demo.appspot.com/assets/poster.jpg" controls autoplay muted></video>
+    <video id="video" width="640" controls autoplay muted></video>
 
     <script>
         function initIndexedDb() {
@@ -137,6 +137,20 @@
         }
 
         (async () => {
+            let registration = await navigator.serviceWorker.register("sw.js");
+            registration.addEventListener("updatefound", (event) => {
+                registration.installing.addEventListener("statechange", (event) => {
+                    console.log(event.target.state);
+                    if (event.target.state === "installed") {
+                        location.reload();
+                    }
+                });
+            });
+
+            if (registration.active) {
+                registration.update();
+            }
+
             const db = await initIndexedDb();
             const assetsStorage = new IdbAssetsStorage(db);
             const segmentsStorage = new IdbSegmentsStorage(db);
@@ -144,7 +158,7 @@
             shaka.polyfill.installAll();
 
             if (shaka.Player.isBrowserSupported() && p2pml.shaka.Engine.isSupported()) {
-                var settings = {
+                const settings = {
                     segments: {
                         assetsStorage: assetsStorage
                     },
@@ -152,11 +166,11 @@
                         segmentsStorage: segmentsStorage
                     }
                 };
-                var engine = new p2pml.shaka.Engine(settings);
+                const engine = new p2pml.shaka.Engine(settings);
 
-                var video = document.getElementById("video");
-                var player = new shaka.Player(video);
-                var onError = function(error) { console.error("Error code", error.code, "object", error); }
+                const video = document.getElementById("video");
+                const player = new shaka.Player(video);
+                const onError = function(error) { console.error("Error code", error.code, "object", error); }
                 player.addEventListener("error", function(event) { onError(event.detail); });
 
                 engine.initShakaPlayer(player);
