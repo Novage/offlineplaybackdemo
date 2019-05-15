@@ -140,7 +140,6 @@
             let registration = await navigator.serviceWorker.register("sw.js");
             registration.addEventListener("updatefound", (event) => {
                 registration.installing.addEventListener("statechange", (event) => {
-                    console.log(event.target.state);
                     if (event.target.state === "installed") {
                         location.reload();
                     }
